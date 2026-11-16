@@ -1,0 +1,105 @@
+{% extends "layout.html" %}
+{% block title %}Analysis — SiteGuardVision{% endblock %}
+
+{% block content %}
+<section class="hero hero-compact">
+  <h1>Analysis result</h1>
+  <p class="muted">Source: <code>{{ source_name }}</code> &middot; conf {{ conf }} &middot; imgsz {{ imgsz }}</p>
+</section>
+
+{% if not result.success %}
+  <div class="alert alert-error">
+    <strong>Processing failed.</strong> {{ result.error }}
+  </div>
+  <p><a href="{{ url_for('home') }}" class="btn">Try another image</a></p>
+{% else %}
+
+{% set total_detected = result.counts.values() | sum %}
+
+<section class="kpis" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+  <div class="kpi kpi-blue">
+    <div class="kpi-label">Objects detected</div>
+    <div class="kpi-value">{{ total_detected }}</div>
+  </div>
+  <div class="kpi kpi-green">
+    <div class="kpi-label">Hard hats</div>
+    <div class="kpi-value">{{ result.hardhat_count }}</div>
+  </div>
+  <div class="kpi {{ 'kpi-red' if result.no_hardhat_count > 0 else 'kpi-green' }}">
+    <div class="kpi-label">Missing Hardhats</div>
+    <div class="kpi-value">{{ result.no_hardhat_count }}</div>
+  </div>
+  <div class="kpi kpi-green">
+    <div class="kpi-label">Vests Detected</div>
+    <div class="kpi-value">{{ result.vest_count }}</div>
+  </div>
+  <div class="kpi {{ 'kpi-red' if result.no_vest_count > 0 else 'kpi-green' }}">
+    <div class="kpi-label">Missing Vests</div>
+    <div class="kpi-value">{{ result.no_vest_count }}</div>
+  </div>
+</section>
+
+<div class="grid-2">
+  <section class="card card-tight">
+    <h2>Annotated image</h2>
+    <img class="annotated" src="{{ url_for('static', filename=result.annotated_rel) }}" alt="Annotated detection result" />
+    <p class="muted small">Image size: {{ result.image_size[0] }} &times; {{ result.image_size[1] }} px</p>
+  </section>
+
+  <section class="card card-tight">
+    <h2>Detections</h2>
+    {% if result.counts and result.counts|length > 0 %}
+      <table class="table">
+        <thead><tr><th>Class</th><th>Count</th></tr></thead>
+        <tbody>
+          {% for label, count in result.counts|dictsort %}
+            <tr>
+              <td>{{ label }}</td>
+              <td>{{ count }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted">No detections at this confidence threshold.</p>
+    {% endif %}
+
+    <!-- Helmets -->
+    <h3 class="mt">Helmet Violations</h3>
+    {% if result.potential_no_hardhat and result.potential_no_hardhat|length > 0 %}
+      <ul class="violations">
+        {% for v in result.potential_no_hardhat %}
+          <li>
+            <span class="badge badge-red">NO-Hardhat</span>
+            confidence {{ '%.2f' % v.confidence }}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">No missing hard hats detected.</p>
+    {% endif %}
+
+    <!-- Vests -->
+    <h3 class="mt">Vest Violations</h3>
+    {% if result.potential_no_vest and result.potential_no_vest|length > 0 %}
+      <ul class="violations">
+        {% for v in result.potential_no_vest %}
+          <li>
+            <span class="badge badge-red">NO-Safety Vest</span>
+            confidence {{ '%.2f' % v.confidence }}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">No missing vests detected.</p>
+    {% endif %}
+
+  </section>
+</div>
+
+<p class="mt">
+  <a href="{{ url_for('home') }}" class="btn">Analyze another image</a>
+</p>
+
+{% endif %}
+{% endblock %}

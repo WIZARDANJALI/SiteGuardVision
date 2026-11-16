@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+*.pt
+*.onnx
+*.pth
+runs/
+uploads/
+static/incoming/
+static/rendered/
+samples/*.pdf
+*.log
+.env

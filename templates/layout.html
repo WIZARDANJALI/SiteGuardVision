@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}SiteGuardVision{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/siteguard.css') }}" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="logo-dot"></span><span class="brand-name">SiteGuardVision</span></div>
+    <nav class="nav"><a href="{{ url_for('home') }}">Home</a></nav>
+  </header>
+  <main class="container">{% block content %}{% endblock %}</main>
+  <footer class="footer">
+    <span>AI-based Industrial PPE &amp; Safety Monitoring — decision-support prototype.</span>
+    <span class="muted">Predictions are <em>potential</em> violations and require human verification.</span>
+  </footer>
+</body>
+</html>
